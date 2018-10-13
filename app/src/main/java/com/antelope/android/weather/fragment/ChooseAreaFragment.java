@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.antelope.android.weather.MainActivity;
 import com.antelope.android.weather.R;
 import com.antelope.android.weather.WeatherActivity;
 import com.antelope.android.weather.db.City;
@@ -93,10 +94,18 @@ public class ChooseAreaFragment extends Fragment {
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY){
                     String weatherId = mCountyList.get(position).getWeatherId();
-                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
-                    intent.putExtra("weather_id",weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    if (getActivity() instanceof MainActivity){
+                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                        intent.putExtra("weather_id",weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    } else if (getActivity() instanceof WeatherActivity){
+                        WeatherActivity weatherActivity = (WeatherActivity) getActivity();
+                        weatherActivity.mDrawerLayout.closeDrawers();
+                        weatherActivity.mSwipeRefresh.setRefreshing(true);
+                        weatherActivity.requestWeather(weatherId);
+                    }
+
                 }
             }
         });
@@ -228,13 +237,6 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
-    }
-
-    private void showProgressBar(){
-        if (mProgressBar != null){
-            mProgressBar = new ProgressBar(getActivity());
-
-        }
     }
 
 }
