@@ -1,5 +1,6 @@
 package com.antelope.android.weather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -218,6 +219,9 @@ public class WeatherActivity extends AppCompatActivity {
         //数据请求完毕时，显示ScrollView
         weatherLayout.setVisibility(View.VISIBLE);
 
+        Intent intent = new Intent(this,AutoUpdateService.class);
+        startService(intent);
+
     }
 
 
@@ -249,6 +253,8 @@ public class WeatherActivity extends AppCompatActivity {
                                     .getDefaultSharedPreferences(WeatherActivity.this).edit();
                             editor.putString("weather",responseText1);
                             editor.apply();
+                            //这里多添加了weatherId是为了重启软件刷新后，获得的地区不是第一次缓存的地区
+                            mWeatherId = weather.basic.weatherId;
                             showWeatherInfo(weather);
                         } else {
                             Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_LONG).show();
