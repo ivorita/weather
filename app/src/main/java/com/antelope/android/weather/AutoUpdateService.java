@@ -21,8 +21,6 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class AutoUpdateService extends Service {
-    public AutoUpdateService() {
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -33,12 +31,29 @@ public class AutoUpdateService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         updateWeather();
         updateBingPic();
+        //获得AlarmManager实例对象
         AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-        int anHour = 6000;
+        int anHour = 8 * 60 * 60 * 1000;
+
+        //SystemClock.elapsedRealtime() 返回系统启动到现在的毫秒数，包括休眠时间
         long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
         Intent i = new Intent(this,AutoUpdateService.class);
+
+        /*PendingIntent可以理解为Intent的封装包，简单的说就是在Intent上在加个指定的动作。
+        在使用Intent的时候，我们还需要在执行startActivity、startService或sendBroadcast才能使Intent有用。
+        而PendingIntent的话就是将这个动作包含在内了。*/
+
+        //通过启动服务来实现闹钟提示的话，PendingIntent对象的获取就应该采用PendingIntent.getService(Context c,int i,Intent intent,int j)
         PendingIntent pi = PendingIntent.getService(this,0,i,0);
         alarmManager.cancel(pi);
+
+        /**
+         * 一次性闹钟
+         * @param int type AlarmManager.ELAPSED_REALTIME_WAKEUP （闹钟类型） 表示闹钟会在睡眠状态下唤醒系统并执行提示功能，该状态下闹钟也使用相对时间，状态值为2
+         * @param long startTime 闹钟的第一次执行时间，以毫秒为单位
+         * @param long intervalTime 对于后两个方法来说，存在本属性，表示两次闹钟执行的间隔时间，也是以毫秒为单位。
+         * @param PendingIntent pi 绑定了闹钟的执行动作，比如发送一个广播、给出提示等。
+         */
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime,pi);
         return super.onStartCommand(intent, flags, startId);
     }
